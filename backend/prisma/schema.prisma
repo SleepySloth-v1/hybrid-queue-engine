@@ -1,0 +1,153 @@
+// Prisma Schema for Hybrid Queue Engine
+// All models use UUID primary keys
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  PROVIDER
+  CUSTOMER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum QueuePriority {
+  NORMAL
+  HIGH
+}
+
+enum QueueStatus {
+  WAITING
+  CALLED
+  SERVED
+  CANCELLED
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  provider     Provider?
+  appointments Appointment[] @relation("CustomerAppointments")
+  queueEntries QueueEntry[]
+
+  @@map("users")
+}
+
+model Center {
+  id        String   @id @default(uuid())
+  name      String
+  location  String
+  createdAt DateTime @default(now())
+
+  providers    Provider[]
+  services     Service[]
+  appointments Appointment[]
+  queueEntries QueueEntry[]
+
+  @@map("centers")
+}
+
+model Provider {
+  id                        String   @id @default(uuid())
+  userId                    String   @unique
+  centerId                  String
+  specialization            String
+  averageServiceTimeMinutes Int      @default(15)
+  createdAt                 DateTime @default(now())
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  center           Center            @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  workingSchedules WorkingSchedule[]
+  appointments     Appointment[]     @relation("ProviderAppointments")
+
+  @@map("providers")
+}
+
+model Service {
+  id              String   @id @default(uuid())
+  centerId        String
+  name            String
+  durationMinutes Int
+  createdAt       DateTime @default(now())
+
+  center       Center        @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+  queueEntries QueueEntry[]
+
+  @@map("services")
+}
+
+model WorkingSchedule {
+  id         String @id @default(uuid())
+  providerId String
+  dayOfWeek  Int    // 0 = Sunday, 6 = Saturday
+  startTime  String // HH:mm format
+  endTime    String // HH:mm format
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, dayOfWeek])
+  @@map("working_schedules")
+}
+
+model Appointment {
+  id         String            @id @default(uuid())
+  customerId String
+  providerId String
+  serviceId  String
+  centerId   String
+  startTime  DateTime
+  endTime    DateTime
+  status     AppointmentStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  customer User    @relation("CustomerAppointments", fields: [customerId], references: [id], onDelete: Cascade)
+  provider Provider @relation("ProviderAppointments", fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  center   Center   @relation(fields: [centerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, startTime])
+  @@index([customerId])
+  @@index([status])
+  @@map("appointments")
+}
+
+model QueueEntry {
+  id         String        @id @default(uuid())
+  customerId String
+  serviceId  String
+  centerId   String
+  priority   QueuePriority @default(NORMAL)
+  status     QueueStatus   @default(WAITING)
+  createdAt  DateTime      @default(now())
+
+  customer User    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  service  Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  center   Center   @relation(fields: [centerId], references: [id], onDelete: Cascade)
+
+  @@index([centerId, status, priority, createdAt])
+  @@map("queue_entries")
+}
