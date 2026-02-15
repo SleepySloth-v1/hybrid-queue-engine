@@ -44,38 +44,39 @@
 ## Use Case Diagram (Mermaid)
 
 ```mermaid
-useCaseDiagram
-    actor "Customer" as Customer
-    actor "Provider" as Provider
-    actor "Admin" as Admin
+flowchart LR
 
-    rectangle Authentication {
-        usecase "Register/Login" as UC_Register
-    }
+    Customer([Customer])
+    Provider([Provider])
+    Admin([Admin])
 
-    rectangle "Customer Actions" {
-        usecase "Book Appointment" as UC_Book
-        usecase "View My Appointments" as UC_ViewMyAppts
-        usecase "Join Walk-in Queue" as UC_WalkIn
-        usecase "View Queue Position" as UC_ViewQueue
-        usecase "Cancel Appointment" as UC_Cancel
-    }
+    subgraph Authentication
+        UC_Register([Register / Login])
+    end
 
-    rectangle "Provider Actions" {
-        usecase "View Schedule" as UC_ViewSchedule
-        usecase "Update Availability" as UC_UpdateAvail
-        usecase "Update Appointment Status" as UC_UpdateStatus
-        usecase "Start Appointment" as UC_StartAppt
-        usecase "Complete Appointment" as UC_CompleteAppt
-    }
+    subgraph Customer_Actions
+        UC_Book([Book Appointment])
+        UC_ViewMyAppts([View My Appointments])
+        UC_WalkIn([Join Walk-in Queue])
+        UC_ViewQueue([View Queue Position])
+        UC_Cancel([Cancel Appointment])
+    end
 
-    rectangle "Admin Actions" {
-        usecase "Create Center" as UC_CreateCenter
-        usecase "Manage Providers" as UC_ManageProviders
-        usecase "Manage Services" as UC_ManageServices
-        usecase "View All Appointments" as UC_ViewAllAppts
-        usecase "View Dashboard Metrics" as UC_Dashboard
-    }
+    subgraph Provider_Actions
+        UC_ViewSchedule([View Schedule])
+        UC_UpdateAvail([Update Availability])
+        UC_UpdateStatus([Update Appointment Status])
+        UC_StartAppt([Start Appointment])
+        UC_CompleteAppt([Complete Appointment])
+    end
+
+    subgraph Admin_Actions
+        UC_CreateCenter([Create Center])
+        UC_ManageProviders([Manage Providers])
+        UC_ManageServices([Manage Services])
+        UC_ViewAllAppts([View All Appointments])
+        UC_Dashboard([View Dashboard Metrics])
+    end
 
     Customer --> UC_Register
     Customer --> UC_Book
@@ -98,3 +99,4 @@ useCaseDiagram
     Admin --> UC_ViewAllAppts
     Admin --> UC_Dashboard
 ```
+
