@@ -44,16 +44,16 @@
 ## Use Case Diagram (Mermaid)
 
 ```mermaid
-usecaseDiagram
+useCaseDiagram
     actor "Customer" as Customer
     actor "Provider" as Provider
     actor "Admin" as Admin
 
-    package "Authentication" {
+    rectangle Authentication {
         usecase "Register/Login" as UC_Register
     }
 
-    package "Customer Actions" {
+    rectangle "Customer Actions" {
         usecase "Book Appointment" as UC_Book
         usecase "View My Appointments" as UC_ViewMyAppts
         usecase "Join Walk-in Queue" as UC_WalkIn
@@ -61,7 +61,7 @@ usecaseDiagram
         usecase "Cancel Appointment" as UC_Cancel
     }
 
-    package "Provider Actions" {
+    rectangle "Provider Actions" {
         usecase "View Schedule" as UC_ViewSchedule
         usecase "Update Availability" as UC_UpdateAvail
         usecase "Update Appointment Status" as UC_UpdateStatus
@@ -69,7 +69,7 @@ usecaseDiagram
         usecase "Complete Appointment" as UC_CompleteAppt
     }
 
-    package "Admin Actions" {
+    rectangle "Admin Actions" {
         usecase "Create Center" as UC_CreateCenter
         usecase "Manage Providers" as UC_ManageProviders
         usecase "Manage Services" as UC_ManageServices
